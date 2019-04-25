@@ -55,11 +55,46 @@ namespace PaymentGateway.Module.Controllers
                    CardCode = Transaction.CardCode,
                    CardNumber = Transaction.CardNumber,
                    ExpirationDate = Transaction.ExpirationDate
-               };            
-
+               };
+            
             Tuple<ANetApiResponse, createTransactionController> response = null;
             response = CreateChasePayTransaction.Run(LoginId, TransactionKey, cardInfo, TotalDue, AuthorizeNet_Payments.Environment.SANDBOX);
-
+            if (response.Item2.GetApiResponse() != null)
+            {
+                if (response.Item2.GetApiResponse().messages.resultCode == messageTypeEnum.Ok)
+                {
+                    if(response.Item2.GetApiResponse().messages != null)
+                    {
+                        Application.ShowViewStrategy.ShowMessage("Success Transaction",InformationType.Success,4000,InformationPosition.Top);
+                        TransactionsHistory transactionsHistory = (TransactionsHistory)View.ObjectSpace.CreateObject(typeof(TransactionsHistory));
+                        transactionsHistory.Transaction = Transaction;
+                        transactionsHistory.Name = Transaction.Oid.ToString();
+                        Transaction.TransactionHistory.Add(transactionsHistory);
+                        View.ObjectSpace.CommitChanges();
+                    }
+                    else
+                    {
+                        
+                        Application.ShowViewStrategy.ShowMessage("Failed Transaction: Error Code: "
+                            + response.Item2.GetApiResponse().transactionResponse.errors[0].errorCode 
+                            + "--" + "Error message: "
+                            + response.Item2.GetApiResponse().transactionResponse.errors[0].errorText, 
+                            InformationType.Error, 4000, InformationPosition.Top);
+                    }
+                }
+                else
+                {
+                    Application.ShowViewStrategy.ShowMessage("Failed Transaction: Error Code: "
+                           + response.Item2.GetApiResponse().transactionResponse.errors[0].errorCode
+                           + "--" + "Error message: "
+                           + response.Item2.GetApiResponse().transactionResponse.errors[0].errorText,
+                           InformationType.Error, 4000, InformationPosition.Top);
+                }
+            }
+            else
+            {
+                Application.ShowViewStrategy.ShowMessage("Your payment can not process", InformationType.Success, 4000, InformationPosition.Top);
+            }
         }
     }
 }

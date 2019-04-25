@@ -37,6 +37,7 @@ namespace PaymentGateway.Module.BusinessObjects
                 return GetCollection<TransactionsHistory>(nameof(TransactionHistory));
             }
         }
+     
         [ModelDefault("AllowEdit", "False")]
         public DateTime PayedDate
         {

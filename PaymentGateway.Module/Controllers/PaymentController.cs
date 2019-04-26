@@ -49,7 +49,7 @@ namespace PaymentGateway.Module.Controllers
            TransactionsManager Transaction = (TransactionsManager)View.CurrentObject;
             var LoginId = "8AN32zkc";
             var TransactionKey = "796crqw5ESA5T92s";
-            var TotalDue=Transaction.TotalDue;
+            var Payed=Transaction.AmountPayed;
                var cardInfo = new AuthorizeNet_Payments.CreditCardInfo()
                {
                    CardCode = Transaction.CardCode,
@@ -58,18 +58,25 @@ namespace PaymentGateway.Module.Controllers
                };
             
             Tuple<ANetApiResponse, createTransactionController> response = null;
-            response = CreateChasePayTransaction.Run(LoginId, TransactionKey, cardInfo, TotalDue, AuthorizeNet_Payments.Environment.SANDBOX);
+            response = CreateChasePayTransaction.Run(LoginId, TransactionKey, cardInfo, Payed, AuthorizeNet_Payments.Environment.SANDBOX);
             if (response.Item2.GetApiResponse() != null)
             {
                 if (response.Item2.GetApiResponse().messages.resultCode == messageTypeEnum.Ok)
                 {
                     if(response.Item2.GetApiResponse().messages != null)
                     {
-                        Application.ShowViewStrategy.ShowMessage("Success Transaction",InformationType.Success,4000,InformationPosition.Top);
+                        Application.ShowViewStrategy.ShowMessage("Success Transaction",InformationType.Success,4000,InformationPosition.Bottom);
                         TransactionsHistory transactionsHistory = (TransactionsHistory)View.ObjectSpace.CreateObject(typeof(TransactionsHistory));
-                        transactionsHistory.Transaction = Transaction;
-                        transactionsHistory.Name = Transaction.Oid.ToString();
-                        Transaction.TransactionHistory.Add(transactionsHistory);
+                        transactionsHistory.PayedDate = Transaction.PayedDate;
+                        transactionsHistory.TotalDue=Transaction.TotalDue;
+                        transactionsHistory.CardCode= Transaction.CardCode;
+                        transactionsHistory.CardNumber=Transaction.CardNumber;
+                        transactionsHistory.Type=Transaction.Type;
+                        transactionsHistory.Transaction=Transaction;
+                        transactionsHistory.ExpirationDate=Transaction.ExpirationDate;
+                        Transaction.AmountPayed =Transaction.AmountPayed;
+                       Transaction.TransactionHistory.Add(transactionsHistory);
+                       
                         View.ObjectSpace.CommitChanges();
                     }
                     else
@@ -93,7 +100,7 @@ namespace PaymentGateway.Module.Controllers
             }
             else
             {
-                Application.ShowViewStrategy.ShowMessage("Your payment can not process", InformationType.Success, 4000, InformationPosition.Top);
+                Application.ShowViewStrategy.ShowMessage("Your payment can not processed", InformationType.Error, 4000, InformationPosition.Top);
             }
         }
     }

@@ -78,14 +78,21 @@ namespace PaymentGateway.Module.BusinessObjects
         }
        
         decimal totalDue;
-
+       
         public decimal TotalDue
         {
             get => totalDue;
             set => SetPropertyValue(nameof(TotalDue), ref totalDue, value);
         }
+        decimal amountPayed;
+       
+        public decimal AmountPayed
+        {
+            get => totalDue;
+            set => SetPropertyValue(nameof(AmountPayed), ref amountPayed, value);
+        }
         //TODO How to use Authorize CreditCardInfo 
-        
+
         //public void DoPayment(CreditCardInfo cardData)
         //{
         //    var LoginId = "8AN32zkc";
@@ -115,7 +122,7 @@ namespace PaymentGateway.Module.BusinessObjects
         //        CardNumber = cardData.CardNumber,
         //        ExpirationDate = cardData.ExpirationDate
         //    };
-           
+
         //    Tuple<ANetApiResponse, createTransactionController> response = null;
         //    response = RefundTransaction.Run(LoginId, TransactionKey, TotalDue, TransactionID, AuthorizeNet_Payments.Environment.SANDBOX, cardInfo);
         //}
